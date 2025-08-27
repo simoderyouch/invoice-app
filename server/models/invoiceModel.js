@@ -102,6 +102,62 @@ const invoiceSchema = mongoose.Schema({
     type: Number,
   
   },
+  // Email tracking fields
+  emailTracking: {
+    trackingId: String, // For webhook tracking
+    sentAt: Date,
+    recipientEmail: String,
+    messageId: String,
+    status: {
+      type: String,
+      enum: ['sent', 'resent', 'failed'],
+      default: 'sent'
+    },
+    openedAt: Date,
+    openedCount: { type: Number, default: 0 },
+    lastOpenedAt: Date
+  },
+  emailHistory: [{
+    sentAt: Date,
+    recipientEmail: String,
+    messageId: String,
+    status: {
+      type: String,
+      enum: ['sent', 'resent', 'failed'],
+      default: 'sent'
+    }
+  }],
+  lastEmailSent: Date,
+  emailOpened: {
+    type: Boolean,
+    default: false
+  },
+  emailOpenedAt: Date,
+  emailOpenedCount: {
+    type: Number,
+    default: 0
+  },
+  // Payment proof fields
+  paymentProof: {
+    paymentToken: String, // Unique token for payment link
+    uploadedAt: Date,
+    fileName: String,
+    filePath: String,
+    fileType: String,
+    fileSize: Number,
+    uploadedBy: String, // client email
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    adminNotes: String,
+    reviewedAt: Date,
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  },
 }, {
   timestamps: true,
   _id: true,

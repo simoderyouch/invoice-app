@@ -38,6 +38,9 @@ connectDb()
 
 app.use("/api/auth", require("./routes/userroutes"));
 app.use('/api/invoices', require('./routes/invoiceroutes'))
+app.use('/api/payment-proof', require('./routes/paymentProofRoutes'))
+app.use('/api/webhook', require('./routes/webhookRoutes'))
+app.use("/api", require("./routes/publicRoutes"));
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`)); 

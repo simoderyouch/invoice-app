@@ -45,7 +45,7 @@ export function Dropdown({
         {label}
       </label>
 
-      <div className="relative">
+      <div className="relative rounded-md border border-[#373c5e]">
         <div
           onClick={() => setShow(!show)}
           readOnly
@@ -71,7 +71,7 @@ export function Dropdown({
         </div>
 
         <ul
-          className={`absolute rounded-md  shadow-md bg-ebony mt-4  w-full ${
+          className={`absolute rounded-md rounded-md border border-[#373c5e] shadow-md bg-ebony mt-4  w-full ${
             show ? "block" : "hidden"
           }  py-2  z-10`}
         >
