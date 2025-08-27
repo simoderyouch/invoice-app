@@ -75,6 +75,111 @@ const fetchInvoice = async (invoiceId) => {
       console.log(error);
     }
   };
+
+  const sendInvoiceEmail = async (invoiceId, recipientEmail) => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.post(`/api/invoices/${invoiceId}/send`, {
+        recipientEmail
+      });
+      
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const resendInvoiceEmail = async (invoiceId, recipientEmail) => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.post(`/api/invoices/${invoiceId}/resend`, {
+        recipientEmail
+      });
+      
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const downloadInvoicePDF = async (invoiceId) => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.get(`/api/invoices/${invoiceId}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice-${invoiceId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const markInvoiceAsPaid = async (invoiceId) => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.put(`/api/invoices/${invoiceId}/mark-paid`);
+      
+      fetchInvoices()
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const reviewPaymentProof = async (invoiceId, status, adminNotes) => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.put(`/api/payment-proof/review/${invoiceId}`, {
+        status,
+        adminNotes
+      });
+      
+      fetchInvoices()
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const getPendingPaymentProofs = async () => {
+    try {
+      setState({isLoading: true})
+      const response = await axiosInstance.get('/api/tracking/payment-proofs/pending');
+      
+      setState({isLoading: false })
+      return response.data;
+    } catch (error) {
+      setState({isLoading: false ,error : error})
+      console.log(error);
+      throw error;
+    }
+  };
    
    
 
@@ -87,6 +192,12 @@ const fetchInvoice = async (invoiceId) => {
     deleteInvoice,
     fetchInvoice,
     createInvoice,
+    sendInvoiceEmail,
+    resendInvoiceEmail,
+    downloadInvoicePDF,
+    markInvoiceAsPaid,
+    reviewPaymentProof,
+    getPendingPaymentProofs
    
 
   };

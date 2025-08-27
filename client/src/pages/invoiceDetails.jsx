@@ -5,20 +5,41 @@ import { useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import InvoiceForm from "../components/invoiceForm";
 import ComfirmationModel from "../components/comfirmationModel";
+import EmailModal from "../components/EmailModal";
+import PaymentProofUpload from "../components/PaymentProofUpload";
+import PaymentProofReview from "../components/PaymentProofReview";
+import EmailTrackingDashboard from "../components/EmailTrackingDashboard";
 import { useContext } from "react";
 import InvoiceContext from "../context/invoiceContext";
 import { useToggle } from '../hooks/useToggle';
-function InvoiceDetails() {
-  const {  fetchInvoice ,updateInvoice} = useInvoiceAPI();
+function InvoiceDetails({ showNotification = () => {} }) {
+  const {  fetchInvoice ,updateInvoice, downloadInvoicePDF, markInvoiceAsPaid} = useInvoiceAPI();
   const {invoice,state} = useContext(InvoiceContext)
   const { id } = useParams();
  
   const [openEditingModal, setEditingModalHandler] = useToggle(false);
-
   const [comfirmationModel, setComfirmationModel] = useToggle(false);
+  const [emailModal, setEmailModal] = useToggle(false);
+  const [showPaymentProof, setShowPaymentProof] = useState(false);
 
   const markAsPaid = async () => {
-    updateInvoice(id, { status: "Paid" });
+    try {
+      await markInvoiceAsPaid(id);
+      showNotification('Invoice marked as paid successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to mark as paid:', error);
+      showNotification('Failed to mark invoice as paid', 'error');
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      await downloadInvoicePDF(id);
+      showNotification('PDF downloaded successfully!', 'success');
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+      showNotification('Failed to download PDF', 'error');
+    }
   };
 
   useEffect(() => {
@@ -31,7 +52,7 @@ function InvoiceDetails() {
       { state.isLoading ? <p>Loading.....</p> : (
         <div
           className="m-auto relative  mt-[5.5rem]  mb-[5.5rem]"
-          style={{ width: "clamp(20rem,87.5%,730px)" }}
+          style={{ width: "clamp(20rem,87.5%,1000px)" }}
         >
           <Link
             to={"/"}
@@ -73,9 +94,21 @@ function InvoiceDetails() {
               >
                 Delete
               </button>
+              <button
+                className="bg-green "
+                onClick={handleDownloadPDF}
+              >
+                Download PDF
+              </button>
+              <button
+                className="bg-purple "
+                onClick={setEmailModal.on}
+              >
+                Send Email
+              </button>
               {invoice?.status === "Pending" && (
                 <button
-                  className="bg-purple whitespace-nowrap "
+                  className="bg-orange whitespace-nowrap "
                   onClick={markAsPaid}
                 >
                   Mark as Paid
@@ -169,6 +202,38 @@ function InvoiceDetails() {
               </div>
             </div>
           </div>
+          
+          {/* Email Tracking Dashboard */}
+          <div className="mt-6">
+            <EmailTrackingDashboard invoice={invoice} />
+          </div>
+          
+          {/* Payment Proof Section */}
+          {invoice?.paymentProof && (
+            <>
+              <PaymentProofReview 
+                paymentProof={invoice.paymentProof}
+                invoiceId={invoice.id}
+                onReview={() => {
+                  fetchInvoice(id);
+                  showNotification('Payment proof reviewed successfully!', 'success');
+                }}
+              />
+</>          )}
+          
+          {/* Payment Proof Upload for Clients */}
+          {!invoice?.paymentProof && invoice?.status === 'Pending' && (
+            <div className="mt-6">
+              <PaymentProofUpload 
+                invoiceId={invoice.id}
+                clientEmail={invoice.clientEmail}
+                onSuccess={() => {
+                  fetchInvoice(id);
+                  showNotification('Payment proof uploaded successfully!', 'success');
+                }}
+              />
+            </div>
+          )}
         </div>
       ) }
 
@@ -177,6 +242,7 @@ function InvoiceDetails() {
         isEditing={true}
         isOpen={openEditingModal}
         handleClose={setEditingModalHandler.off}
+        showNotification={showNotification}
       />
       {comfirmationModel && (
         <ComfirmationModel
@@ -184,6 +250,14 @@ function InvoiceDetails() {
           handleClose={setComfirmationModel}
         />
       )}
+      <EmailModal
+        isOpen={emailModal}
+        onClose={setEmailModal.off}
+        invoiceId={invoice?.id}
+        clientEmail={invoice?.clientEmail}
+        clientName={invoice?.clientName}
+        invoice={invoice}
+      />
     </div>
   );
 }

@@ -29,7 +29,7 @@ function CalendarComponents({ handleDate, initialDate, disable,reset }) {
           disable && "pointer-events-none"
         } cursor-pointer w-full relative`}
       >
-        <div className="flex  flex-col gap-2">
+        <div className="flex  flex-col gap-2 ">
           <label
             htmlFor={"invoiceDate"}
             className="text-selago text-[12px] font-[400] tracking-tighter"
@@ -39,7 +39,7 @@ function CalendarComponents({ handleDate, initialDate, disable,reset }) {
 
           <p
             style={{ opacity: disable ? 0.5 : 1 }}
-            className={`  rounded-md bg-ebony text-[12px] h-auto text-start font-semibold w-full p-[.8rem] pl-4  pt-[.9rem]
+            className={`  rounded-md border border-[#373c5e] rounded-md bg-ebony text-[12px] h-auto text-start font-semibold w-full p-[.8rem] pl-4  pt-[.9rem]
         text-offWhite`}
           >
             {initialDate && initialDate !== "" ? initialDate : formatDate(getDate(date))}
@@ -61,7 +61,7 @@ function CalendarComponents({ handleDate, initialDate, disable,reset }) {
       </div>
       {showCalendar && (
         <div
-          className="absolute z-10  rounded shadow top-full left-[-20px] mt-2"
+          className="absolute z-10  rounded shadow border rounded-md border border-[#373c5e] top-full left-[-20px] mt-2"
           style={{ width: "calc(100% + 40px)" }}
         >
           <Calendar onChange={handleDateChange} value={date} />
